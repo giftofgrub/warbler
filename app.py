@@ -56,38 +56,41 @@ def do_logout():
 
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
-    """Handle user signup.
+  """Handle user signup.
 
-    Create new user and add to DB. Redirect to home page.
+  Create new user and add to DB. Redirect to home page.
 
-    If form not valid, present form.
+  If form not valid, present form.
 
-    If the there already is a user with that username: flash message
-    and re-present form.
-    """
+  If the there already is a user with that username: flash message
+  and re-present form.
+  """
 
-    form = UserAddForm()
-    
-    if form.validate_on_submit():
-        try:
-            user = User.signup(
-                username=form.username.data,
-                password=form.password.data,
-                email=form.email.data,
-                image_url=form.image_url.data or User.image_url.default.arg,
-            )
-            db.session.commit()
+  form = UserAddForm()
+  
+  if form.validate_on_submit():
+    try:
+      user = User.signup(
+          username=form.username.data,
+          password=form.password.data,
+          email=form.email.data,
+          image_url=form.image_url.data or User.image_url.default.arg,
+          header_image_url=form.header_image_url.data,
+          bio = form.bio.data,
+          location = form.location.data
+      )
+      db.session.commit()
 
-        except IntegrityError as e:
-            flash("Username already taken", 'danger')
-            return render_template('users/signup.html', form=form)
+    except IntegrityError as e:
+      flash("Username already taken", 'danger')
+      return render_template('users/signup.html', form=form)
 
-        do_login(user)
+    do_login(user)
 
-        return redirect("/")
+    return redirect("/")
 
-    else:
-        return render_template('users/signup.html', form=form)
+  else:
+    return render_template('users/signup.html', form=form)
 
 
 @app.route('/login', methods=["GET", "POST"])
@@ -207,10 +210,28 @@ def stop_following(follow_id):
 
 @app.route('/users/profile', methods=["GET", "POST"])
 def profile():
-    """Update profile for current user."""
+  """Update profile for current user."""
+  user = g.user
+  form = UserAddForm(obj=user)
 
-    # IMPLEMENT THIS
+  if form.validate_on_submit():
+    user = User.authenticate(user.username, form.password.data)
+    if user:
+      user.username = form.username.data
+      user.email = form.email.data
+      user.image_url = form.image_url.data
+      user.header_image_url = form.header_image_url.data
+      user.bio = form.bio.data
+      user.location = form.location.data
 
+      db.session.add(user)
+      db.session.commit()
+      flash(f'{user.username} has been edited', 'warning')
+    else:
+      flash('Incorrect password for {{ user.username }}', 'warning')
+    return redirect(f'/users/{user.id}')
+  else:
+      return render_template('/users/edit.html', form=form)
 
 @app.route('/users/delete', methods=["POST"])
 def delete_user():
