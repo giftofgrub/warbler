@@ -51,6 +51,25 @@
               <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
               <p>{{ msg.text }}</p>
             </div>
+            {% if msg in g.user.liked_messages %}
+              <form method='POST' 
+                    class='form-like-small' 
+                    action='/messages/{{ msg.id }}/like' 
+              >
+                <input type='hidden' name=like value='unlike'>
+                <input type='hidden' name=next value='/'>
+                <button type='submit' class='btn-like'><h6><i class="fas fa-thumbs-up"></i></h6></button>
+              </form>
+            {% else %} 
+              <form method='POST'
+                    class='form-like-small' 
+                    action='/messages/{{ msg.id }}/like'>
+                <input type='hidden' name=like value='like'>
+                <input type='hidden' name=next value='/'>
+                <button type='submit' class='btn-like'><h6><i class="far fa-thumbs-up"></i></h6></button>
+              </form>
+            {% endif %}
+
           </li>
         {% endfor %}
       </ul>

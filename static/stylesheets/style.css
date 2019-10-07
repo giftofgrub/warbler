@@ -160,6 +160,7 @@ nav + .container {
 
 #profile-image,
 #profile-avatar {
+  
   display: block;
   margin-left: -15px;
 }
@@ -301,6 +302,25 @@ nav + .container {
   color: #657786;
 }
 
+.form-like {
+  display: inline;
+}
+
+.form-like-small {
+  z-index: 1;
+}
+
+.btn-like {
+  z-index:10;
+  border: none;
+  outline: none;
+  background: none;
+  cursor: pointer;
+}
+
+.btn-like:hover{
+  text-shadow: 0.5px 0.5px gray;
+}
 /* ==================== User cards on follower/following pages */
 
 .user-card {

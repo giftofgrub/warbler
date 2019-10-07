@@ -254,48 +254,65 @@ def delete_user():
 
 @app.route('/messages/new', methods=["GET", "POST"])
 def messages_add():
-    """Add a message:
+  """Add a message:
 
-    Show form if GET. If valid, update message and redirect to user page.
-    """
+  Show form if GET. If valid, update message and redirect to user page.
+  """
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+  if not g.user:
+      flash("Access unauthorized.", "danger")
+      return redirect("/")
 
-    form = MessageForm()
+  form = MessageForm()
 
-    if form.validate_on_submit():
-        msg = Message(text=form.text.data)
-        g.user.messages.append(msg)
-        db.session.commit()
+  if form.validate_on_submit():
+      msg = Message(text=form.text.data)
+      g.user.messages.append(msg)
+      db.session.commit()
 
-        return redirect(f"/users/{g.user.id}")
+      return redirect(f"/users/{g.user.id}")
 
-    return render_template('messages/new.html', form=form)
+  return render_template('messages/new.html', form=form)
 
 
 @app.route('/messages/<int:message_id>', methods=["GET"])
 def messages_show(message_id):
-    """Show a message."""
+  """Show a message."""
 
-    msg = Message.query.get(message_id)
-    return render_template('messages/show.html', message=msg)
+  msg = Message.query.get(message_id)
+  return render_template('messages/show.html', message=msg)
+
+@app.route('/messages/<int:message_id>/like', methods=["POST"])
+def handle_message_like(message_id):
+  
+  if not g.user:
+      flash("Access unauthorized.", "danger")
+      return redirect("/login")
+  
+  if request.form['like'] == 'like':
+      message = Message.query.get(message_id)
+      message.user_likes.append(g.user)
+      db.session.commit()
+  elif request.form['like'] == 'unlike':
+      message = Message.query.get(message_id)
+      message.user_likes.remove(g.user)
+      db.session.commit()
+  return redirect(request.form.get('next'))
 
 
 @app.route('/messages/<int:message_id>/delete', methods=["POST"])
 def messages_destroy(message_id):
-    """Delete a message."""
+  """Delete a message."""
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+  if not g.user:
+      flash("Access unauthorized.", "danger")
+      return redirect("/")
 
-    msg = Message.query.get(message_id)
-    db.session.delete(msg)
-    db.session.commit()
+  msg = Message.query.get(message_id)
+  db.session.delete(msg)
+  db.session.commit()
 
-    return redirect(f"/users/{g.user.id}")
+  return redirect(f"/users/{g.user.id}")
 
 
 ##############################################################################
