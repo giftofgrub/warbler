@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm
 from models import db, connect_db, User, Message
+import pdb
 
 CURR_USER_KEY = "curr_user"
 
@@ -18,7 +19,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
-app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret")
 toolbar = DebugToolbarExtension(app)
 
@@ -66,7 +67,7 @@ def signup():
     """
 
     form = UserAddForm()
-
+    
     if form.validate_on_submit():
         try:
             user = User.signup(
@@ -94,7 +95,7 @@ def login():
     """Handle user login."""
 
     form = LoginForm()
-
+  
     if form.validate_on_submit():
         user = User.authenticate(form.username.data,
                                  form.password.data)
@@ -112,12 +113,9 @@ def login():
 @app.route('/logout')
 def logout():
     """Handle logout of user."""
-
-    # IMPLEMENT THIS
-
-
-##############################################################################
-# General user routes:
+    flash(f'User {session[CURR_USER_KEY]} just logged out', 'success')
+    do_logout()
+    return redirect("/login")
 
 @app.route('/users')
 def list_users():
