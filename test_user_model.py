@@ -58,7 +58,7 @@ class UserModelTestCase(TestCase):
     """Does basic model work?"""
 
     u = User(
-        email="testuser@test.com",
+        email="testuser@testuser.com",
         username="testuser",
         password="testuser"
     )
@@ -69,13 +69,13 @@ class UserModelTestCase(TestCase):
     # User should have no messages & no followers
     self.assertEqual(len(u.messages), 0)
     self.assertEqual(len(u.followers), 0)
-    self.assertEqual(u.email, "testuser@test.com")
+    self.assertEqual(u.email, "testuser@testuser.com")
     self.assertEqual(u.username, "testuser")
 
   def test_signup(self):
     """Does signup for users work? """
     u = User.signup(
-        email="testuser@test.com",
+        email="testuser@testuser.com",
         username="testuser",
         password="testuser",
         image_url=None,
@@ -94,7 +94,7 @@ class UserModelTestCase(TestCase):
   def test_authenticate(self):
     """Does authentication process work?  Does passed in password match database password?"""
     u = User.signup(
-      email="testuser@test.com",
+      email="testuser@testuser.com",
       username="testuser",
       password="testuser",
       image_url=None,
