@@ -280,6 +280,7 @@ def messages_show(message_id):
   """Show a message."""
 
   msg = Message.query.get(message_id)
+  print(msg.id, "GAB", msg.text)
   return render_template('messages/show.html', message=msg)
 
 @app.route('/messages/<int:message_id>/like', methods=["POST"])

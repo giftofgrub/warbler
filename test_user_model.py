@@ -8,7 +8,8 @@
 import os
 from unittest import TestCase
 
-from models import db, User, Message, Follows
+from models import db, User, Message, Follows, Likes
+from datetime import datetime
 
 # BEFORE we import our app, let's set an environmental variable
 # to use a different database for tests (we need to do this
@@ -30,29 +31,85 @@ db.create_all()
 
 
 class UserModelTestCase(TestCase):
-    """Test views for messages."""
+  """Test views for messages."""
 
-    def setUp(self):
-        """Create test client, add sample data."""
+  def setUp(self):
+    """Create test client, add sample data."""
 
-        User.query.delete()
-        Message.query.delete()
-        Follows.query.delete()
+    User.query.delete()
+    Message.query.delete()
+    Follows.query.delete()
+    Likes.query.delete()
+    db.session.commit()
 
-        self.client = app.test_client()
+    self.client = app.test_client()
 
-    def test_user_model(self):
-        """Does basic model work?"""
+  def tearDown(self):
+    """Delete all instances of users from db"""
+    User.query.delete()
+    Message.query.delete()
+    Follows.query.delete()
+    db.session.commit()
 
-        u = User(
-            email="test@test.com",
-            username="testuser",
-            password="HASHED_PASSWORD"
-        )
+    self.client = app.test_client()
 
-        db.session.add(u)
-        db.session.commit()
 
-        # User should have no messages & no followers
-        self.assertEqual(len(u.messages), 0)
-        self.assertEqual(len(u.followers), 0)
+  def test_user_model(self):
+    """Does basic model work?"""
+
+    u = User(
+        email="testuser@test.com",
+        username="testuser",
+        password="testuser"
+    )
+
+    db.session.add(u)
+    db.session.commit()
+
+    # User should have no messages & no followers
+    self.assertEqual(len(u.messages), 0)
+    self.assertEqual(len(u.followers), 0)
+    self.assertEqual(u.email, "testuser@test.com")
+    self.assertEqual(u.username, "testuser")
+
+  def test_signup(self):
+    """Does signup for users work? """
+    u = User.signup(
+        email="testuser@test.com",
+        username="testuser",
+        password="testuser",
+        image_url=None,
+        header_image_url=None,
+        bio=None,
+        location=None
+    )
+
+    db.session.add(u)
+    db.session.commit()
+
+    # username and hashed password expected
+    self.assertEqual(u.username, "testuser")
+    self.assertIn('$2b$12$', u.password)
+  
+  def test_authenticate(self):
+    """Does authentication process work?  Does passed in password match database password?"""
+    u = User.signup(
+      email="testuser@test.com",
+      username="testuser",
+      password="testuser",
+      image_url=None,
+      header_image_url=None,
+      bio=None,
+      location=None
+    )
+
+    db.session.add(u)
+    db.session.commit()
+
+    authenticated_user = User.authenticate(u.username, 'testuser')
+    unauthenticated_user = User.authenticate(u.username, 'wrongPassword')
+
+    # Correct password should return user
+    # Incorrect password should return False
+    self.assertEqual(authenticated_user.username, 'testuser')
+    self.assertEqual(unauthenticated_user, False)
